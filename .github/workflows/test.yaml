@@ -1,0 +1,42 @@
+name: Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python3 - --version 1.8.4
+
+      - name: Set up Poetry environment
+        run: poetry install --no-root
+
+      - name: Run mypy
+        run: |
+          poetry run mypy --show-error-codes --install-types --non-interactive --show-error-codes --strict .
+
+      - name: Run ruff
+        run: |
+          poetry run ruff format --check .
+          poetry run ruff check .
+
+      - name: Run tests
+        run: |
+          export UPSTASH_SEARCH_REST_URL="${{secrets.UPSTASH_SEARCH_REST_URL}}"
+          export UPSTASH_SEARCH_REST_TOKEN="${{secrets.UPSTASH_SEARCH_REST_TOKEN}}"
+          poetry install
+          poetry run pytest

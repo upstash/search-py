@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "upstash-search"
+version = "0.1.0"
+description = "An HTTP/REST based AI Search client built on top of Upstash REST API."
+license = "MIT"
+authors = ["Upstash <support@upstash.com>"]
+maintainers = ["Upstash <support@upstash.com>"]
+readme = "README.md"
+repository = "https://github.com/upstash/search-py"
+keywords = ["Search", "Upstash Search", "Serverless Search"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Database",
+    "Topic :: Database :: Front-Ends",
+    "Topic :: Software Development :: Libraries",
+]
+
+packages = [{ include = "upstash_search" }]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+httpx = ">=0.23.0, <1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+python-dotenv = "^1.1.0"
+pytest-asyncio = "^0.26.0"
+mypy = "^1.15.0"
+ruff = "^0.11.10"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
