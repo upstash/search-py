@@ -10,7 +10,6 @@ from upstash_search.paths import (
     RESET_PATH,
 )
 from upstash_search.types import (
-    UpsertDocument,
     DocumentScore,
     Document,
     RangeDocuments,
@@ -41,7 +40,7 @@ class AsyncIndex:
     async def upsert(
         self,
         documents: t.Sequence[
-            t.Union[t.Dict[t.Any, t.Any], t.Tuple[t.Any, ...], UpsertDocument]
+            t.Union[t.Dict[t.Any, t.Any], t.Tuple[t.Any, ...], Document]
         ],
     ) -> None:
         """
@@ -70,8 +69,6 @@ class AsyncIndex:
         limit: int = 10,
         filter: str = "",
         reranking: bool = False,
-        include_data: bool = True,
-        include_fields: bool = True,
     ) -> t.List[DocumentScore]:
         """
         Searches for documents matching the given query text.
@@ -80,8 +77,6 @@ class AsyncIndex:
         :param limit: Number of documents to return.
         :param filter: Fields filter to narrow down results.
         :param reranking: Whether to perform reranking on the results or not.
-        :param include_data: Whether to include data with the results or not.
-        :param include_fields: Whether to include fields with the results or not.
         """
 
         payload = {
@@ -89,8 +84,8 @@ class AsyncIndex:
             "topK": limit,
             "filter": filter,
             "reranking": reranking,
-            "includeData": include_data,
-            "includeMetadata": include_fields,
+            "includeData": True,
+            "includeMetadata": True,
         }
 
         result = await self._requester.post(
@@ -109,22 +104,17 @@ class AsyncIndex:
         *,
         ids: t.Optional[t.Sequence[str]] = None,
         prefix: t.Optional[str] = None,
-        include_data: bool = True,
-        include_fields: bool = True,
     ) -> t.List[t.Optional[Document]]:
         """
         Fetches documents for the given ids or id prefix.
 
         :param ids: List of document ids to fetch.
         :param prefix: Prefix of the document ids to fetch.
-        :param include_data: Whether to include data with the results or not.
-        :param include_fields: Whether to include fields with the results or not.
-        :return:
         """
 
         payload: t.Dict[str, t.Any] = {
-            "includeData": include_data,
-            "includeMetadata": include_fields,
+            "includeData": True,
+            "includeMetadata": True,
         }
 
         if ids is not None:
@@ -185,8 +175,6 @@ class AsyncIndex:
         cursor: str = "",
         limit: int = 1,
         prefix: t.Optional[str] = None,
-        include_data: bool = True,
-        include_fields: bool = True,
     ) -> RangeDocuments:
         """
         Ranges over the documents, starting from the cursor,
@@ -198,15 +186,13 @@ class AsyncIndex:
         :param cursor: Cursor to start range from.
         :param limit: At most how many documents to return.
         :param prefix: Optional document id prefix to range over.
-        :param include_data: Whether to include data with the results or not.
-        :param include_fields: Whether to include fields with the results or not.
         """
 
         payload = {
             "cursor": cursor,
             "limit": limit,
-            "includeData": include_data,
-            "includeMetadata": include_fields,
+            "includeData": True,
+            "includeMetadata": True,
         }
 
         if prefix is not None:

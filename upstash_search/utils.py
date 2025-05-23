@@ -1,13 +1,11 @@
 import typing as t
 
 from upstash_search.errors import ClientError
-from upstash_search.types import UpsertDocument
+from upstash_search.types import Document
 
 
 def documents_to_payload(
-    documents: t.Sequence[
-        t.Union[t.Dict[t.Any, t.Any], t.Tuple[t.Any, ...], UpsertDocument]
-    ],
+    documents: t.Sequence[t.Union[t.Dict[t.Any, t.Any], t.Tuple[t.Any, ...], Document]],
 ) -> t.List[t.Dict[str, t.Any]]:
     payload = []
     for doc in documents:
@@ -24,9 +22,9 @@ def documents_to_payload(
 
 
 def _parse_document(
-    document: t.Union[t.Dict[t.Any, t.Any], t.Tuple[t.Any, ...], UpsertDocument],
-) -> UpsertDocument:
-    if isinstance(document, UpsertDocument):
+    document: t.Union[t.Dict[t.Any, t.Any], t.Tuple[t.Any, ...], Document],
+) -> Document:
+    if isinstance(document, Document):
         return document
     elif isinstance(document, tuple):
         return _parse_tuple(document)
@@ -36,7 +34,7 @@ def _parse_document(
         raise ClientError(f"Unsupported document type: {document}")
 
 
-def _parse_tuple(document: t.Tuple[t.Any, ...]) -> UpsertDocument:
+def _parse_tuple(document: t.Tuple[t.Any, ...]) -> Document:
     if len(document) < 2:
         raise ClientError(
             "The tuple must contain at least two elements; "
@@ -51,19 +49,19 @@ def _parse_tuple(document: t.Tuple[t.Any, ...]) -> UpsertDocument:
     else:
         fields = None
 
-    return UpsertDocument(
+    return Document(
         id=doc_id,
         data=data,
         fields=fields,
     )
 
 
-def _parse_dict(document: t.Dict[t.Any, t.Any]) -> UpsertDocument:
+def _parse_dict(document: t.Dict[t.Any, t.Any]) -> Document:
     doc_id = document["id"]
     data = document["data"]
     fields = document.get("fields")
 
-    return UpsertDocument(
+    return Document(
         id=doc_id,
         data=data,
         fields=fields,

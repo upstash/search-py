@@ -2,7 +2,7 @@ import pytest
 
 from tests import assert_eventually_async
 from upstash_search import AsyncIndex
-from upstash_search.types import UpsertDocument
+from upstash_search.types import Document
 
 
 @pytest.mark.asyncio
@@ -13,15 +13,13 @@ async def test_upsert_async(async_index: AsyncIndex) -> None:
             ("id-1", "data-1", {"key": "value-1"}),
             {"id": "id-2", "data": "data-2"},
             {"id": "id-3", "data": "data-3", "fields": {"key": "value-3"}},
-            UpsertDocument(id="id-4", data="data-4"),
-            UpsertDocument(id="id-5", data="data-5", fields={"key": "value-5"}),
+            Document(id="id-4", data="data-4"),
+            Document(id="id-5", data="data-5", fields={"key": "value-5"}),
         ]
     )
 
     documents = await async_index.fetch(
         ids=["id-0", "id-1", "id-2", "id-3", "id-4", "id-5"],
-        include_data=True,
-        include_fields=True,
     )
 
     assert len(documents) == 6
@@ -86,8 +84,6 @@ async def test_search_async(async_index: AsyncIndex) -> None:
         scores = await async_index.search(
             "data-1",
             limit=1,
-            include_data=True,
-            include_fields=True,
         )
         assert len(scores) == 1
 
@@ -114,15 +110,13 @@ async def test_search_filter_async(async_index: AsyncIndex) -> None:
             "data-1",
             limit=1,
             filter="key = 2",
-            include_data=True,
-            include_fields=False,
         )
         assert len(scores) == 1
 
         assert scores[0].id == "id-2"
         assert scores[0].score > 0.0
         assert scores[0].data == "data-2"
-        assert scores[0].fields is None
+        assert scores[0].fields == {"key": 2}
 
     await assert_eventually_async(assertion)
 
@@ -138,8 +132,6 @@ async def test_fetch_async(async_index: AsyncIndex) -> None:
 
     documents = await async_index.fetch(
         ids=["id-0", "id-1", "id-2"],
-        include_data=True,
-        include_fields=True,
     )
 
     assert len(documents) == 3
@@ -169,8 +161,6 @@ async def test_fetch_with_prefix_async(async_index: AsyncIndex) -> None:
 
     documents = await async_index.fetch(
         prefix="i-",
-        include_data=True,
-        include_fields=False,
     )
 
     assert len(documents) == 1
@@ -178,7 +168,7 @@ async def test_fetch_with_prefix_async(async_index: AsyncIndex) -> None:
     assert documents[0] is not None
     assert documents[0].id == "i-d-2"
     assert documents[0].data == "data-2"
-    assert documents[0].fields is None
+    assert documents[0].fields == {"key": "value-2"}
 
 
 @pytest.mark.asyncio
@@ -197,8 +187,6 @@ async def test_delete_async(async_index: AsyncIndex) -> None:
 
     documents = await async_index.fetch(
         ids=["id-0", "id-1", "id-2"],
-        include_data=True,
-        include_fields=True,
     )
 
     assert len(documents) == 3
@@ -224,8 +212,6 @@ async def test_delete_prefix_async(async_index: AsyncIndex) -> None:
 
     documents = await async_index.fetch(
         ids=["i-d-2"],
-        include_data=True,
-        include_fields=True,
     )
 
     assert len(documents) == 1
@@ -249,8 +235,6 @@ async def test_delete_filter_async(async_index: AsyncIndex) -> None:
 
     documents = await async_index.fetch(
         ids=["id-0", "id-1", "id-2"],
-        include_data=False,
-        include_fields=False,
     )
 
     assert len(documents) == 3
@@ -272,8 +256,6 @@ async def test_range_async(async_index: AsyncIndex) -> None:
     range_documents = await async_index.range(
         cursor="",
         limit=1,
-        include_data=True,
-        include_fields=True,
     )
 
     assert range_documents.next_cursor != ""
@@ -286,20 +268,18 @@ async def test_range_async(async_index: AsyncIndex) -> None:
     range_documents = await async_index.range(
         cursor=range_documents.next_cursor,
         limit=5,
-        include_data=False,
-        include_fields=False,
     )
 
     assert range_documents.next_cursor == ""
     assert len(range_documents.documents) == 2
 
     assert range_documents.documents[0].id == "id-1"
-    assert range_documents.documents[0].data is None
-    assert range_documents.documents[0].fields is None
+    assert range_documents.documents[0].data == "data-1"
+    assert range_documents.documents[0].fields == {"key": 1}
 
     assert range_documents.documents[1].id == "id-2"
-    assert range_documents.documents[1].data is None
-    assert range_documents.documents[1].fields is None
+    assert range_documents.documents[1].data == "data-2"
+    assert range_documents.documents[1].fields == {"key": 2}
 
 
 @pytest.mark.asyncio
@@ -316,15 +296,13 @@ async def test_range_prefix_async(async_index: AsyncIndex) -> None:
         cursor="",
         prefix="i-",
         limit=10,
-        include_data=False,
-        include_fields=True,
     )
 
     assert range_documents.next_cursor == ""
     assert len(range_documents.documents) == 1
 
     assert range_documents.documents[0].id == "i-d-2"
-    assert range_documents.documents[0].data is None
+    assert range_documents.documents[0].data == "data-2"
     assert range_documents.documents[0].fields == {"key": 2}
 
 
@@ -341,8 +319,6 @@ async def test_reset_async(async_index: AsyncIndex) -> None:
 
     documents = await async_index.fetch(
         ids=["id-0", "id-1", "id-2"],
-        include_data=True,
-        include_fields=True,
     )
 
     assert len(documents) == 3

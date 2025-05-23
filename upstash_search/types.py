@@ -3,23 +3,16 @@ import typing as t
 
 
 @dataclasses.dataclass
-class UpsertDocument:
-    id: str
-    data: str
-    fields: t.Optional[t.Dict[t.Any, t.Any]] = None
-
-
-@dataclasses.dataclass
 class Document:
     id: str
-    data: t.Optional[str] = None
+    data: str
     fields: t.Optional[t.Dict[t.Any, t.Any]] = None
 
 
 def parse_document(result: t.Dict[t.Any, t.Any]) -> Document:
     return Document(
         id=result["id"],
-        data=result.get("data"),
+        data=result["data"],
         fields=result.get("metadata"),
     )
 

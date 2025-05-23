@@ -2,7 +2,7 @@ import pytest
 
 from tests import assert_eventually
 from upstash_search import Index
-from upstash_search.types import UpsertDocument
+from upstash_search.types import Document
 
 
 def test_upsert(index: Index) -> None:
@@ -12,15 +12,13 @@ def test_upsert(index: Index) -> None:
             ("id-1", "data-1", {"key": "value-1"}),
             {"id": "id-2", "data": "data-2"},
             {"id": "id-3", "data": "data-3", "fields": {"key": "value-3"}},
-            UpsertDocument(id="id-4", data="data-4"),
-            UpsertDocument(id="id-5", data="data-5", fields={"key": "value-5"}),
+            Document(id="id-4", data="data-4"),
+            Document(id="id-5", data="data-5", fields={"key": "value-5"}),
         ]
     )
 
     documents = index.fetch(
         ids=["id-0", "id-1", "id-2", "id-3", "id-4", "id-5"],
-        include_data=True,
-        include_fields=True,
     )
 
     assert len(documents) == 6
@@ -83,8 +81,6 @@ def test_search(index: Index) -> None:
         scores = index.search(
             "data-1",
             limit=1,
-            include_data=True,
-            include_fields=True,
         )
         assert len(scores) == 1
 
@@ -110,15 +106,13 @@ def test_search_filter(index: Index) -> None:
             "data-1",
             limit=1,
             filter="key = 2",
-            include_data=True,
-            include_fields=False,
         )
         assert len(scores) == 1
 
         assert scores[0].id == "id-2"
         assert scores[0].score > 0.0
         assert scores[0].data == "data-2"
-        assert scores[0].fields is None
+        assert scores[0].fields == {"key": 2}
 
     assert_eventually(assertion)
 
@@ -133,8 +127,6 @@ def test_fetch(index: Index) -> None:
 
     documents = index.fetch(
         ids=["id-0", "id-1", "id-2"],
-        include_data=True,
-        include_fields=True,
     )
 
     assert len(documents) == 3
@@ -163,8 +155,6 @@ def test_fetch_with_prefix(index: Index) -> None:
 
     documents = index.fetch(
         prefix="i-",
-        include_data=True,
-        include_fields=False,
     )
 
     assert len(documents) == 1
@@ -172,7 +162,7 @@ def test_fetch_with_prefix(index: Index) -> None:
     assert documents[0] is not None
     assert documents[0].id == "i-d-2"
     assert documents[0].data == "data-2"
-    assert documents[0].fields is None
+    assert documents[0].fields == {"key": "value-2"}
 
 
 def test_delete(index: Index) -> None:
@@ -190,8 +180,6 @@ def test_delete(index: Index) -> None:
 
     documents = index.fetch(
         ids=["id-0", "id-1", "id-2"],
-        include_data=True,
-        include_fields=True,
     )
 
     assert len(documents) == 3
@@ -216,8 +204,6 @@ def test_delete_prefix(index: Index) -> None:
 
     documents = index.fetch(
         ids=["i-d-2"],
-        include_data=True,
-        include_fields=True,
     )
 
     assert len(documents) == 1
@@ -240,8 +226,6 @@ def test_delete_filter(index: Index) -> None:
 
     documents = index.fetch(
         ids=["id-0", "id-1", "id-2"],
-        include_data=False,
-        include_fields=False,
     )
 
     assert len(documents) == 3
@@ -262,8 +246,6 @@ def test_range(index: Index) -> None:
     range_documents = index.range(
         cursor="",
         limit=1,
-        include_data=True,
-        include_fields=True,
     )
 
     assert range_documents.next_cursor != ""
@@ -276,20 +258,18 @@ def test_range(index: Index) -> None:
     range_documents = index.range(
         cursor=range_documents.next_cursor,
         limit=5,
-        include_data=False,
-        include_fields=False,
     )
 
     assert range_documents.next_cursor == ""
     assert len(range_documents.documents) == 2
 
     assert range_documents.documents[0].id == "id-1"
-    assert range_documents.documents[0].data is None
-    assert range_documents.documents[0].fields is None
+    assert range_documents.documents[0].data == "data-1"
+    assert range_documents.documents[0].fields == {"key": 1}
 
     assert range_documents.documents[1].id == "id-2"
-    assert range_documents.documents[1].data is None
-    assert range_documents.documents[1].fields is None
+    assert range_documents.documents[1].data == "data-2"
+    assert range_documents.documents[1].fields == {"key": 2}
 
 
 def test_range_prefix(index: Index) -> None:
@@ -305,15 +285,13 @@ def test_range_prefix(index: Index) -> None:
         cursor="",
         prefix="i-",
         limit=10,
-        include_data=False,
-        include_fields=True,
     )
 
     assert range_documents.next_cursor == ""
     assert len(range_documents.documents) == 1
 
     assert range_documents.documents[0].id == "i-d-2"
-    assert range_documents.documents[0].data is None
+    assert range_documents.documents[0].data == "data-2"
     assert range_documents.documents[0].fields == {"key": 2}
 
 
@@ -329,8 +307,6 @@ def test_reset(index: Index) -> None:
 
     documents = index.fetch(
         ids=["id-0", "id-1", "id-2"],
-        include_data=True,
-        include_fields=True,
     )
 
     assert len(documents) == 3
