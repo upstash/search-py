@@ -3,6 +3,12 @@ from upstash_search import Collection
 
 
 def test_list_indexes(collection: Collection) -> None:
+    index = collection.index(INDEX_NAME)
+    index.upsert(
+        documents=[
+            ("id-0", "data"),
+        ],
+    )
     indexes = collection.list_indexes()
 
     assert len(indexes) >= 1

@@ -6,6 +6,12 @@ from upstash_search import AsyncCollection
 
 @pytest.mark.asyncio
 async def test_list_indexes_async(async_collection: AsyncCollection) -> None:
+    async_index = async_collection.index(INDEX_NAME)
+    await async_index.upsert(
+        documents=[
+            ("id-0", "data"),
+        ],
+    )
     indexes = await async_collection.list_indexes()
 
     assert len(indexes) >= 1
