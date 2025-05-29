@@ -23,9 +23,9 @@ from upstash_search.utils import documents_to_payload
 
 class AsyncIndex:
     """
-    Represents an index of a collection.
+    Represents an index of a database.
 
-    Each index is an isolated component of a collection where
+    Each index is an isolated component of a database where
     documents can be added, retrieved, searched, and deleted.
     """
 
@@ -75,7 +75,7 @@ class AsyncIndex:
 
         :param query: Query text to search for.
         :param limit: Number of documents to return.
-        :param filter: Fields filter to narrow down results.
+        :param filter: Content filter to narrow down results.
         :param reranking: Whether to perform reranking on the results or not.
         """
 
@@ -141,13 +141,13 @@ class AsyncIndex:
     ) -> int:
         """
         Deletes the documents having the given ids,
-        id prefix, or fields matching with filter.
+        id prefix, or content matching with filter.
 
         Returns how many documents are deleted.
 
         :param ids: List of document ids to delete.
         :param prefix: Prefix of the document ids to delete.
-        :param filter: Filter to delete documents with matching fields.
+        :param filter: Filter to delete documents with matching content.
         """
 
         payload: t.Dict[str, t.Any] = {}

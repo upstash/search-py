@@ -13,8 +13,8 @@ def documents_to_payload(
         payload.append(
             {
                 "id": parsed_doc.id,
-                "data": parsed_doc.data,
-                "metadata": parsed_doc.fields,
+                "content": parsed_doc.content,
+                "metadata": parsed_doc.metadata,
             }
         )
 
@@ -38,31 +38,31 @@ def _parse_tuple(document: t.Tuple[t.Any, ...]) -> Document:
     if len(document) < 2:
         raise ClientError(
             "The tuple must contain at least two elements; "
-            "one for id, and other for data."
+            "one for id, and other for content."
         )
 
     doc_id = document[0]
-    data = document[1]
+    content = document[1]
 
     if len(document) > 2:
-        fields = document[2]
+        metadata = document[2]
     else:
-        fields = None
+        metadata = None
 
     return Document(
         id=doc_id,
-        data=data,
-        fields=fields,
+        content=content,
+        metadata=metadata,
     )
 
 
 def _parse_dict(document: t.Dict[t.Any, t.Any]) -> Document:
     doc_id = document["id"]
-    data = document["data"]
-    fields = document.get("fields")
+    content = document["content"]
+    metadata = document.get("metadata")
 
     return Document(
         id=doc_id,
-        data=data,
-        fields=fields,
+        content=content,
+        metadata=metadata,
     )

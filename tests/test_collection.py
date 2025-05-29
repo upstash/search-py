@@ -1,46 +1,46 @@
 from tests import INDEX_NAME
-from upstash_search import Collection
+from upstash_search import Search
 
 
-def test_list_indexes(collection: Collection) -> None:
-    index = collection.index(INDEX_NAME)
+def test_list_indexes(search: Search) -> None:
+    index = search.index(INDEX_NAME)
     index.upsert(
         documents=[
-            ("id-0", "data"),
+            ("id-0", {"data": 0}),
         ],
     )
-    indexes = collection.list_indexes()
+    indexes = search.list_indexes()
 
     assert len(indexes) >= 1
 
 
-def test_delete_index(collection: Collection) -> None:
+def test_delete_index(search: Search) -> None:
     name = INDEX_NAME + "!"
-    another_index = collection.index(name)
+    another_index = search.index(name)
     another_index.upsert(
         documents=[
-            ("id-0", "data"),
+            ("id-0", {"data": 0}),
         ],
     )
 
-    indexes = collection.list_indexes()
+    indexes = search.list_indexes()
     assert name in indexes
 
-    collection.delete_index(name)
+    search.delete_index(name)
 
-    indexes = collection.list_indexes()
+    indexes = search.list_indexes()
     assert name not in indexes
 
 
-def test_info(collection: Collection) -> None:
-    index = collection.index(INDEX_NAME)
+def test_info(search: Search) -> None:
+    index = search.index(INDEX_NAME)
     index.upsert(
         documents=[
-            ("id-0", "data"),
+            ("id-0", {"data": 0}),
         ],
     )
 
-    info = collection.info()
+    info = search.info()
     assert info.document_count > 0
     assert INDEX_NAME in info.indexes
 

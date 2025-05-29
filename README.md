@@ -25,36 +25,49 @@ It is a connectionless (HTTP based) AI Search client and designed for:
 pip install upstash-search
 ```
 
-### Create Collection
+### Create Database
 
-Create a new collection on [Upstash](https://console.upstash.com/search)
+Create a new database on [Upstash](https://console.upstash.com/search)
 
 ## Basic Usage:
 
 ```py
-from upstash_search import Collection
+from upstash_search import Search
 
-# Initialize collection
-collection = Collection(
+client = Search(
     url="<UPSTASH_SEARCH_REST_URL>",
     token="<UPSTASH_SEARCH_REST_TOKEN>",
 )
 
-# Access the index of a collection
-index = collection.index("movies")
+# Access the index of a database
+index = client.index("movies")
 
 # Upsert documents into index
 index.upsert(
     documents=[
         {
             "id": "movie-0",
-            "data": "Star Wars is a sci-fi space opera",
-            "fields": {"title": "Star Wars", "genre": "sci-fi", "category": "classic"},
+            "content": {
+                "title": "Star Wars",
+                "overview": "Sci-fi space opera",
+                "genre": "sci-fi",
+                "category": "classic",
+            },
+            "metadata": {
+                "poster": "https://poster.link/starwars.jpg",
+            },
         },
         {
             "id": "movie-1",
-            "data": "Inception is a mind-bending thriller",
-            "fields": {"title": "Inception", "genre": "action", "category": "modern"},
+            "content": {
+                "title": "Inception",
+                "overview": "Mind-bending thriller",
+                "genre": "sci-fi",
+                "category": "modern",
+            },
+            "metadata": {
+                "poster": "https://poster.link/inception.jpg",
+            },
         },
     ],
 )
@@ -109,7 +122,7 @@ index.delete(
 # Reset the index (delete all documents)
 index.reset()
 
-# Get collection and index info
-info = collection.info()
+# Get database and index info
+info = client.info()
 print(info)
 ```

@@ -1,24 +1,24 @@
 import os
 import typing as t
 
-from upstash_search.http import Requester
-from upstash_search.index import Index
+from upstash_search.asyncio.http import AsyncRequester
+from upstash_search.asyncio.index import AsyncIndex
 from upstash_search.paths import LIST_INDEXES_PATH, DELETE_INDEX_PATH, INFO_PATH
-from upstash_search.types import CollectionInfo, parse_collection_info
+from upstash_search.types import Info, parse_info
 
 
-class Collection:
+class AsyncSearch:
     """
-    Upstash Search collection client that uses the HTTP API to perform operations.
+    Upstash Search client that uses the HTTP API to perform operations.
 
     ```python
-    from upstash_search import Collection
+    from upstash_search import AsyncSearch
 
-    collection = Collection(
+    client = AsyncSearch(
         url="UPSTASH_SEARCH_REST_URL",
         token="UPSTASH_SEARCH_REST_TOKEN",
     )
-    index = collection.index("INDEX_NAME")
+    index = client.index("INDEX_NAME")
     ```
     """
 
@@ -32,7 +32,7 @@ class Collection:
         allow_telemetry: bool = True,
     ):
         self._url = url
-        self._requester = Requester(
+        self._requester = AsyncRequester(
             url=url,
             token=token,
             retries=retries,
@@ -40,50 +40,50 @@ class Collection:
             allow_telemetry=allow_telemetry,
         )
 
-    def index(self, name: str) -> Index:
+    def index(self, name: str) -> AsyncIndex:
         """
         Returns an index for the given name.
 
-        Each index is an isolated component of a collection where
+        Each index is an isolated component of a database where
         documents can be added, retrieved, searched, and deleted.
 
         :param name: Name of the index.
         """
 
-        return Index(name, self._requester)
+        return AsyncIndex(name, self._requester)
 
-    def list_indexes(self) -> t.List[str]:
+    async def list_indexes(self) -> t.List[str]:
         """
-        Returns the names of the indexes of the collection.
+        Returns the names of the indexes of the database.
         """
 
-        indexes = self._requester.post(
+        indexes = await self._requester.post(
             path=LIST_INDEXES_PATH,
         )
         return indexes  # type: ignore[no-any-return]
 
-    def delete_index(self, name: str) -> None:
+    async def delete_index(self, name: str) -> None:
         """
-        Deletes the given index of the collection.
+        Deletes the given index of the database.
 
         :param name: Name of the index to delete.
         """
 
-        self._requester.post(
+        await self._requester.post(
             path=DELETE_INDEX_PATH,
             index=name,
         )
 
-    def info(self) -> CollectionInfo:
+    async def info(self) -> Info:
         """
-        Returns the collection info.
+        Returns the database info.
         """
 
-        result = self._requester.post(
+        result = await self._requester.post(
             path=INFO_PATH,
         )
 
-        return parse_collection_info(result)
+        return parse_info(result)
 
     @classmethod
     def from_env(
@@ -92,7 +92,7 @@ class Collection:
         retries: int = 3,
         retry_interval: float = 1.0,
         allow_telemetry: bool = True,
-    ) -> "Collection":
+    ) -> "AsyncSearch":
         """
         Load the credentials from environment variables,
         and returns a client.

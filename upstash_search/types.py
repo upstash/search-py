@@ -5,15 +5,15 @@ import typing as t
 @dataclasses.dataclass
 class Document:
     id: str
-    data: str
-    fields: t.Optional[t.Dict[t.Any, t.Any]] = None
+    content: t.Dict[t.Any, t.Any]
+    metadata: t.Optional[t.Dict[t.Any, t.Any]] = None
 
 
 def parse_document(result: t.Dict[t.Any, t.Any]) -> Document:
     return Document(
         id=result["id"],
-        data=result["data"],
-        fields=result.get("metadata"),
+        content=result["content"],
+        metadata=result.get("metadata"),
     )
 
 
@@ -21,16 +21,16 @@ def parse_document(result: t.Dict[t.Any, t.Any]) -> Document:
 class DocumentScore:
     id: str
     score: float
-    data: t.Optional[str] = None
-    fields: t.Optional[t.Dict[t.Any, t.Any]] = None
+    content: t.Dict[t.Any, t.Any]
+    metadata: t.Optional[t.Dict[t.Any, t.Any]] = None
 
 
 def parse_document_score(result: t.Dict[t.Any, t.Any]) -> DocumentScore:
     return DocumentScore(
         id=result["id"],
         score=result["score"],
-        data=result.get("data"),
-        fields=result.get("metadata"),
+        content=result["content"],
+        metadata=result.get("metadata"),
     )
 
 
@@ -61,18 +61,18 @@ def parse_index_info(result: t.Dict[t.Any, t.Any]) -> IndexInfo:
 
 
 @dataclasses.dataclass
-class CollectionInfo:
+class Info:
     document_count: int
     pending_document_count: int
-    collection_size: int
+    disk_size: int
     indexes: t.Dict[str, IndexInfo]
 
 
-def parse_collection_info(result: t.Dict[t.Any, t.Any]) -> CollectionInfo:
-    return CollectionInfo(
+def parse_info(result: t.Dict[t.Any, t.Any]) -> Info:
+    return Info(
         document_count=result["vectorCount"],
         pending_document_count=result["pendingVectorCount"],
-        collection_size=result["indexSize"],
+        disk_size=result["indexSize"],
         indexes={
             index: parse_index_info(index_info)
             for index, index_info in result["namespaces"].items()
