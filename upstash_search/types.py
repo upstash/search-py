@@ -17,6 +17,13 @@ def parse_document(result: t.Dict[t.Any, t.Any]) -> Document:
     )
 
 
+UpsertDocumentT = t.Union[
+    Document,
+    t.Dict[str, t.Any],
+    t.Tuple[t.Any, ...],
+]
+
+
 @dataclasses.dataclass
 class DocumentScore:
     id: str
