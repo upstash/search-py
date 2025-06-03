@@ -54,6 +54,41 @@ def test_upsert(index: Index) -> None:
     assert documents[5].metadata == {"key": "value-5"}
 
 
+def test_upsert_single(index: Index) -> None:
+    index.upsert(
+        ("id-0", {"data": 0}),
+    )
+
+    index.upsert(
+        {"id": "id-1", "content": {"data": 1}, "metadata": {"key": "value-1"}},
+    )
+
+    index.upsert(
+        Document(id="id-2", content={"data": 2}),
+    )
+
+    documents = index.fetch(
+        ids=["id-0", "id-1", "id-2"],
+    )
+
+    assert len(documents) == 3
+
+    assert documents[0] is not None
+    assert documents[0].id == "id-0"
+    assert documents[0].content == {"data": 0}
+    assert documents[0].metadata is None
+
+    assert documents[1] is not None
+    assert documents[1].id == "id-1"
+    assert documents[1].content == {"data": 1}
+    assert documents[1].metadata == {"key": "value-1"}
+
+    assert documents[2] is not None
+    assert documents[2].id == "id-2"
+    assert documents[2].content == {"data": 2}
+    assert documents[2].metadata is None
+
+
 def test_upsert_invalid_tuple_or_dict(index: Index) -> None:
     with pytest.raises(Exception):
         index.upsert(documents=[("id",)])

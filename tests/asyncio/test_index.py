@@ -56,6 +56,42 @@ async def test_upsert_async(async_index: AsyncIndex) -> None:
 
 
 @pytest.mark.asyncio
+async def test_upsert_single_async(async_index: AsyncIndex) -> None:
+    await async_index.upsert(
+        ("id-0", {"data": 0}),
+    )
+
+    await async_index.upsert(
+        {"id": "id-1", "content": {"data": 1}, "metadata": {"key": "value-1"}},
+    )
+
+    await async_index.upsert(
+        Document(id="id-2", content={"data": 2}),
+    )
+
+    documents = await async_index.fetch(
+        ids=["id-0", "id-1", "id-2"],
+    )
+
+    assert len(documents) == 3
+
+    assert documents[0] is not None
+    assert documents[0].id == "id-0"
+    assert documents[0].content == {"data": 0}
+    assert documents[0].metadata is None
+
+    assert documents[1] is not None
+    assert documents[1].id == "id-1"
+    assert documents[1].content == {"data": 1}
+    assert documents[1].metadata == {"key": "value-1"}
+
+    assert documents[2] is not None
+    assert documents[2].id == "id-2"
+    assert documents[2].content == {"data": 2}
+    assert documents[2].metadata is None
+
+
+@pytest.mark.asyncio
 async def test_upsert_invalid_tuple_or_dict_async(async_index: AsyncIndex) -> None:
     with pytest.raises(Exception):
         await async_index.upsert(documents=[("id",)])

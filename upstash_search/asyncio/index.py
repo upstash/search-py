@@ -17,6 +17,7 @@ from upstash_search.types import (
     parse_document,
     parse_deleted,
     parse_range_documents,
+    UpsertDocumentT,
 )
 from upstash_search.utils import documents_to_payload
 
@@ -39,9 +40,7 @@ class AsyncIndex:
 
     async def upsert(
         self,
-        documents: t.Sequence[
-            t.Union[t.Dict[t.Any, t.Any], t.Tuple[t.Any, ...], Document]
-        ],
+        documents: t.Union[UpsertDocumentT, t.List[UpsertDocumentT]],
     ) -> None:
         """
         Upserts(updates or inserts) documents.
@@ -53,6 +52,8 @@ class AsyncIndex:
 
         :param documents: Documents to upsert.
         """
+        if not isinstance(documents, list):
+            documents = [documents]
 
         payload = documents_to_payload(documents)
 
