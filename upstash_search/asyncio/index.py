@@ -71,7 +71,7 @@ class AsyncIndex:
         filter: str = "",
         reranking: bool = False,
         semantic_weight: float = 0.75,
-        input_enrichment: bool = True    
+        input_enrichment: bool = True,
     ) -> t.List[DocumentScore]:
         """
         Searches for documents matching the given query text.
@@ -94,7 +94,7 @@ class AsyncIndex:
             "includeData": True,
             "includeMetadata": True,
             "semanticWeight": semantic_weight,
-            "inputEnrichment": input_enrichment
+            "inputEnrichment": input_enrichment,
         }
 
         result = await self._requester.post(

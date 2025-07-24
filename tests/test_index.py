@@ -113,10 +113,7 @@ def test_search(index: Index) -> None:
     )
 
     def assertion() -> None:
-        scores = index.search(
-            "data 1",
-            limit=1,
-        )
+        scores = index.search("data 1", limit=1, semantic_weight=0.50)
         assert len(scores) == 1
 
         assert scores[0].id == "id-1"
@@ -138,9 +135,7 @@ def test_search_filter(index: Index) -> None:
 
     def assertion() -> None:
         scores = index.search(
-            "data 1",
-            limit=1,
-            filter="data = 2",
+            "data 1", limit=1, filter="data = 2", input_enrichment=False
         )
         assert len(scores) == 1
 
