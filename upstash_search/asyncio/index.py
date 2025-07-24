@@ -70,6 +70,8 @@ class AsyncIndex:
         limit: int = 10,
         filter: str = "",
         reranking: bool = False,
+        semantic_weight: float = 0.75,
+        input_enrichment: bool = True    
     ) -> t.List[DocumentScore]:
         """
         Searches for documents matching the given query text.
@@ -78,6 +80,10 @@ class AsyncIndex:
         :param limit: Number of documents to return.
         :param filter: Content filter to narrow down results.
         :param reranking: Whether to perform reranking on the results or not.
+        :param semanticWeight: Optional relevance balance between semantic and keyword search (0-1 range, defaults to 0.75).
+            For instance, 0.2 applies 20% semantic matching with 80% full-text matching.
+            You can learn more about how Upstash Search works from [our docs](https://upstash.com/docs/search/features/algorithm).
+        :param inputEnrichment: Optional boolean to enhance queries before searching (enabled by default).
         """
 
         payload = {
@@ -87,6 +93,8 @@ class AsyncIndex:
             "reranking": reranking,
             "includeData": True,
             "includeMetadata": True,
+            "semanticWeight": semantic_weight,
+            "inputEnrichment": input_enrichment
         }
 
         result = await self._requester.post(

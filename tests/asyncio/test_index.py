@@ -120,6 +120,7 @@ async def test_search_async(async_index: AsyncIndex) -> None:
         scores = await async_index.search(
             "data 1",
             limit=1,
+            semantic_weight=0.50
         )
         assert len(scores) == 1
 
@@ -146,6 +147,7 @@ async def test_search_filter_async(async_index: AsyncIndex) -> None:
             "data 1",
             limit=1,
             filter="data = 2",
+            input_enrichment=False
         )
         assert len(scores) == 1
 
