@@ -79,7 +79,9 @@ class Index:
         :param query: Query text to search for.
         :param limit: Number of documents to return.
         :param filter: Content filter to narrow down results.
-        :param reranking: Whether to perform reranking on the results or not.
+        :param reranking: Optional boolean to use enhanced search result reranking. It will have additional
+            cost when enabled. See [Search Pricing](https://upstash.com/pricing/search) for more details.
+            False by default.
         :param semanticWeight: Optional relevance balance between semantic and keyword search (0-1 range, defaults to 0.75).
             For instance, 0.2 applies 20% semantic matching with 80% full-text matching.
             You can learn more about how Upstash Search works from [our docs](https://upstash.com/docs/search/features/algorithm).
