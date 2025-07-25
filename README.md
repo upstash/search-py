@@ -89,9 +89,38 @@ print(scores)
 scores = index.search(
     query="space opera",
     limit=2,
-    reranking=True,
+    reranking=True
 )
 print(scores)
+
+# AI search with only semantic search
+scores = index.search(
+  query="space opera",
+  limit=2,
+  semantic_weight=1
+)
+
+# AI search with only full-text search
+scores = index.search(
+  query="space opera",
+  limit=2,
+  semantic_weight=0
+)
+
+# AI search with full-text search and sematic search
+# combined with equal weights
+scores = index.search(
+  query="space opera",
+  limit=2,
+  semantic_weight=0.5
+)
+
+# AI search without input enrichment
+scores = index.search(
+  query="space opera",
+  limit=2,
+  input_enrichment=False
+)
 
 # AI search with filtering
 scores = index.search(

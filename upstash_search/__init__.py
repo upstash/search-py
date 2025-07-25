@@ -1,4 +1,4 @@
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 from upstash_search.asyncio.index import AsyncIndex
 from upstash_search.asyncio.search import AsyncSearch
