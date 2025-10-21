@@ -155,3 +155,22 @@ index.reset()
 info = client.info()
 print(info)
 ```
+
+## Telemetry
+
+This sdk sends anonymous telemetry data to help us improve your experience.
+We collect the following:
+
+- SDK version
+- Platform (Cloudflare, AWS or Vercel)
+- Runtime version (node@18.x)
+
+You can opt out using the allow_telemetry flag when creating the client:
+
+```ts
+client = Search(
+    url="UPSTASH_SEARCH_REST_URL",
+    token="UPSTASH_SEARCH_REST_TOKEN",
+    allow_telemetry=False,
+)
+```
