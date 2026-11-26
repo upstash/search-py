@@ -2,11 +2,12 @@ import os
 import platform as p
 import time
 import typing as t
+from urllib.parse import quote
 
 import httpx
 
 from upstash_search import __version__
-from upstash_search.errors import UpstashError
+from upstash_search.errors import ClientError, UpstashError
 
 
 def generate_headers(token: str, allow_telemetry: bool) -> t.Dict[str, str]:
@@ -28,6 +29,31 @@ def generate_headers(token: str, allow_telemetry: bool) -> t.Dict[str, str]:
         headers["Upstash-Telemetry-Platform"] = platform
 
     return headers
+
+
+def request_url(base_url: str, path: str, index: t.Optional[str] = None) -> str:
+    """
+    Builds the url of a request, optionally for an index.
+
+    The index name is percent-encoded so that characters such as
+    "?", "#" and spaces stay part of the name.
+    """
+    if index is None or index == "":
+        return f"{base_url}{path}"
+
+    if not isinstance(index, str):
+        raise ClientError("Index name must be a string.")
+
+    if index in (".", ".."):
+        raise ClientError('Index name cannot be "." or "..".')
+
+    if any(char in index for char in "/\\%"):
+        raise ClientError('Index name cannot contain "/", "\\" or "%".')
+
+    if any(ord(char) < 32 or ord(char) == 127 for char in index):
+        raise ClientError("Index name cannot contain control characters.")
+
+    return f"{base_url}{path}/{quote(index, safe='')}"
 
 
 class Requester:
@@ -56,10 +82,7 @@ class Requester:
         payload: t.Optional[t.Any] = None,
         index: t.Optional[str] = None,
     ) -> t.Any:
-        if index:
-            url = f"{self._url}{path}/{index}"
-        else:
-            url = f"{self._url}{path}"
+        url = request_url(self._url, path, index)
 
         response = None
         last_error = None

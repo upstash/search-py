@@ -4,7 +4,7 @@ import typing as t
 import httpx
 
 from upstash_search.errors import UpstashError
-from upstash_search.http import generate_headers
+from upstash_search.http import generate_headers, request_url
 
 
 class AsyncRequester:
@@ -33,10 +33,7 @@ class AsyncRequester:
         payload: t.Optional[t.Any] = None,
         index: t.Optional[str] = None,
     ) -> t.Any:
-        if index:
-            url = f"{self._url}{path}/{index}"
-        else:
-            url = f"{self._url}{path}"
+        url = request_url(self._url, path, index)
 
         response = None
         last_error = None
