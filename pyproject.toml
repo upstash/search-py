@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "upstash-search"
-version = "0.1.1"
+version = "0.1.2"
 description = "An HTTP/REST based AI Search client built on top of Upstash REST API."
 license = "MIT"
 authors = ["Upstash <support@upstash.com>"]
