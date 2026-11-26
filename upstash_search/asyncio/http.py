@@ -3,8 +3,7 @@ import typing as t
 
 import httpx
 
-from upstash_search.errors import UpstashError
-from upstash_search.http import generate_headers, request_url
+from upstash_search.http import generate_headers, parse_response, request_url
 
 
 class AsyncRequester:
@@ -56,8 +55,4 @@ class AsyncRequester:
             assert last_error is not None
             raise last_error
 
-        body = response.json()
-        if "error" in body:
-            raise UpstashError(body["error"])
-
-        return body["result"]
+        return parse_response(response)

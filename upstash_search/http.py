@@ -60,6 +60,34 @@ def request_url(base_url: str, path: str, index: t.Optional[str] = None) -> str:
     return f"{base_url}{path}/{quote(index, safe='')}"
 
 
+def parse_response(response: httpx.Response) -> t.Any:
+    """
+    Returns the result in a response, or raises `UpstashError`.
+
+    A response is not guaranteed to have a JSON body, for example when it
+    is a redirect or comes from a proxy. The status is included in the
+    error in that case, so that the reason is visible.
+    """
+    try:
+        body = response.json()
+    except ValueError:
+        body = None
+
+    if isinstance(body, dict):
+        if "error" in body:
+            raise UpstashError(body["error"])
+
+        if "result" in body:
+            return body["result"]
+
+    text = response.text[:500]
+    raise UpstashError(
+        f"Unexpected response with status {response.status_code}: {text}"
+        if text
+        else f"Unexpected response with status {response.status_code} and an empty body"
+    )
+
+
 class Requester:
     def __init__(
         self,
@@ -109,8 +137,4 @@ class Requester:
             assert last_error is not None
             raise last_error
 
-        body = response.json()
-        if "error" in body:
-            raise UpstashError(body["error"])
-
-        return body["result"]
+        return parse_response(response)
