@@ -36,8 +36,12 @@ def request_url(base_url: str, path: str, index: t.Optional[str] = None) -> str:
     Builds the url of a request, optionally for an index.
 
     The index name is percent-encoded so that characters such as
-    "?", "#" and spaces stay part of the name.
+    "?", "#" and spaces stay part of the name. Numbers are converted
+    to strings.
     """
+    if isinstance(index, int) and not isinstance(index, bool):
+        index = str(index)
+
     if index is None or index == "":
         return f"{base_url}{path}"
 

@@ -41,6 +41,12 @@ def test_names_that_cannot_be_used(name: str) -> None:
         request_url(URL, "/search", name)
 
 
-def test_non_string_name() -> None:
+def test_number_as_name() -> None:
+    assert request_url(URL, "/search", 5) == f"{URL}/search/5"  # type: ignore[arg-type]
+    assert request_url(URL, "/search", 0) == f"{URL}/search/0"  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("name", [True, 1.5, b"movies", ["movies"]])
+def test_non_string_name(name: object) -> None:
     with pytest.raises(ClientError):
-        request_url(URL, "/search", 5)  # type: ignore[arg-type]
+        request_url(URL, "/search", name)  # type: ignore[arg-type]
