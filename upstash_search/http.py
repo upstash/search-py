@@ -2,11 +2,12 @@ import os
 import platform as p
 import time
 import typing as t
+from urllib.parse import quote
 
 import httpx
 
 from upstash_search import __version__
-from upstash_search.errors import UpstashError
+from upstash_search.errors import ClientError, UpstashError
 
 
 def generate_headers(token: str, allow_telemetry: bool) -> t.Dict[str, str]:
@@ -28,6 +29,63 @@ def generate_headers(token: str, allow_telemetry: bool) -> t.Dict[str, str]:
         headers["Upstash-Telemetry-Platform"] = platform
 
     return headers
+
+
+def request_url(base_url: str, path: str, index: t.Optional[str] = None) -> str:
+    """
+    Builds the url of a request, optionally for an index.
+
+    The index name is percent-encoded so that characters such as
+    "?", "#" and spaces stay part of the name. Numbers are converted
+    to strings.
+    """
+    if isinstance(index, int) and not isinstance(index, bool):
+        index = str(index)
+
+    if index is None or index == "":
+        return f"{base_url}{path}"
+
+    if not isinstance(index, str):
+        raise ClientError("Index name must be a string.")
+
+    if index in (".", ".."):
+        raise ClientError('Index name cannot be "." or "..".')
+
+    if any(char in index for char in "/\\%"):
+        raise ClientError('Index name cannot contain "/", "\\" or "%".')
+
+    if any(ord(char) < 32 or ord(char) == 127 for char in index):
+        raise ClientError("Index name cannot contain control characters.")
+
+    return f"{base_url}{path}/{quote(index, safe='')}"
+
+
+def parse_response(response: httpx.Response) -> t.Any:
+    """
+    Returns the result in a response, or raises `UpstashError`.
+
+    A response is not guaranteed to have a JSON body, for example when it
+    is a redirect or comes from a proxy. The status is included in the
+    error in that case, so that the reason is visible.
+    """
+    try:
+        body = response.json()
+    except ValueError:
+        body = None
+
+    if isinstance(body, dict):
+        if "error" in body:
+            raise UpstashError(body["error"])
+
+        if "result" in body:
+            return body["result"]
+
+    text = response.text[:500]
+    raise UpstashError(
+        f"Unexpected response with status {response.status_code}: {text}"
+        if text
+        else f"Unexpected response with status {response.status_code} and an empty body"
+    )
 
 
 class Requester:
@@ -56,10 +114,7 @@ class Requester:
         payload: t.Optional[t.Any] = None,
         index: t.Optional[str] = None,
     ) -> t.Any:
-        if index:
-            url = f"{self._url}{path}/{index}"
-        else:
-            url = f"{self._url}{path}"
+        url = request_url(self._url, path, index)
 
         response = None
         last_error = None
@@ -82,8 +137,4 @@ class Requester:
             assert last_error is not None
             raise last_error
 
-        body = response.json()
-        if "error" in body:
-            raise UpstashError(body["error"])
-
-        return body["result"]
+        return parse_response(response)
